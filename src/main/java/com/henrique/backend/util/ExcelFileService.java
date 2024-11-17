@@ -10,13 +10,19 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.NonTransientResourceException;
+import org.springframework.batch.item.ParseException;
+import org.springframework.batch.item.UnexpectedInputException;
+import org.springframework.lang.Nullable;
 
 import com.henrique.backend.dtos.ProductDTO;
 
-public final class ExcelFileService implements Serializable{
+public final class ExcelFileService implements Serializable, ItemReader<ProductDTO>{
 
     private static final int HEADER_NUMBER = 4;
     private static final int ROW_NUMBER = 9;
+    private int currentIndex = 0;
 
     private XSSFSheet sheet;
     private List<ProductDTO> productList = new ArrayList<>();
@@ -26,7 +32,7 @@ public final class ExcelFileService implements Serializable{
     }
 
     // Method to open a spreadsheet
-    public void openXlsx(String path) {
+    void openXlsx(String path) {
         try (var file = new FileInputStream(path)) {
             var book = new XSSFWorkbook(file);
             for (int i = 0; i < book.getNumberOfSheets(); i++) {
@@ -39,7 +45,7 @@ public final class ExcelFileService implements Serializable{
     }
 
     // Function to find out the rows that contain data
-    private int filledLines(XSSFSheet sheet) {
+    int filledLines(XSSFSheet sheet) {
         int filledRowsCount = 0;
 
         // Iterate over all rows up to the last row with content
@@ -65,7 +71,7 @@ public final class ExcelFileService implements Serializable{
     }
 
     // Process each row in the sheet
-    private void processSheet(XSSFSheet sheet, int lastRow) {
+    void processSheet(XSSFSheet sheet, int lastRow) {
         int count = HEADER_NUMBER;
 
         for (int i = 0; i < lastRow; i++) {
@@ -80,7 +86,7 @@ public final class ExcelFileService implements Serializable{
         }
     }
 
-    private ProductDTO readProductData(XSSFRow row) {
+    ProductDTO readProductData(XSSFRow row) {
         try {
             String[] attributes = {
                 getCellValue(row.getCell(0)),
@@ -110,7 +116,7 @@ public final class ExcelFileService implements Serializable{
         return null;
     }
 
-    private String getCellValue(XSSFCell cell) {
+    String getCellValue(XSSFCell cell) {
         if (cell == null) return "";
         return switch (cell.getCellType()) {
             case STRING -> cell.getStringCellValue();
@@ -120,4 +126,21 @@ public final class ExcelFileService implements Serializable{
             default -> "Type not supported";
         };
     }
+
+    @Override
+    @Nullable
+    public ProductDTO read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+        try {
+            int currentIndex = 0;
+            if(currentIndex < productList.size()) {
+                return productList.get(currentIndex);
+            } else {
+                return null;
+            }
+        } catch(Exception e) {
+            e.getMessage();
+            throw e;
+        }
+    }
+
 }

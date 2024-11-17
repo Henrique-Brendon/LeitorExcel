@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.henrique.backend.dtos.ProductDTO;
+import com.henrique.backend.util.ExcelFileService;
 
 @Configuration
 public class BatchConfig {
@@ -25,7 +26,7 @@ public class BatchConfig {
         this.transactionManager = transactionManager;
         this.jobRepository = jobRepository;
     }
-
+    
     @Bean
     Job jobExcelProcessing(Step stepExcelFile) {
         return new JobBuilder("jobExcelProcessing", jobRepository)
@@ -43,4 +44,10 @@ public class BatchConfig {
             .writer(writer)
             .build();
     }
+
+    @Bean
+    ItemReader<ProductDTO> reader() {
+        return new ExcelFileService("files//amd.xlsx");
+    }
+
 }

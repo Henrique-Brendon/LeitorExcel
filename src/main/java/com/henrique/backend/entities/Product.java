@@ -145,6 +145,7 @@ public class Product implements Serializable{
         return new BigDecimal(valueWithoutCurrency);
     }
 
+	// New Method to convert date String to Instant (ISO 8601)
 	private Instant convertDateToInstant(String dateStr) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		LocalDate localDate = LocalDate.parse(dateStr, formatter);
