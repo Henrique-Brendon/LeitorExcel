@@ -1,6 +1,5 @@
 package com.henrique.backend.jobs;
 
-import org.apache.commons.math3.stat.descriptive.summary.Product;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -15,6 +14,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.henrique.backend.dtos.ProductDTO;
+import com.henrique.backend.entities.ListCode;
+import com.henrique.backend.entities.Product;
+import com.henrique.backend.entities.Sector;
 import com.henrique.backend.util.ExcelFileService;
 
 @Configuration
@@ -50,4 +52,15 @@ public class BatchConfig {
         return new ExcelFileService("files//amd.xlsx");
     }
 
+    @Bean
+    ItemProcessor<ProductDTO, Product> processor() {
+        return item -> {
+            var product = new Product(null, item.name(), item.characteristics(), null, null, null,
+                null, new Sector(item.sector()), new ListCode(item.listCode()))
+                .convertCurrency(item.cost(), item.price())
+                .convertDate(item.dateEntry(), item.dateExit());
+            return product;
+        };
+    }
+    
 }
