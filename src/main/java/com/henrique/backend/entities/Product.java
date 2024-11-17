@@ -3,6 +3,8 @@ package com.henrique.backend.entities;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Product implements Serializable{
@@ -120,6 +122,20 @@ public class Product implements Serializable{
 		this.listCode = listCode;
 	}
 
+	// Method that uses the utility to convert both cost and price
+	public Product convertCurrency(String costCoin, String priceCoin) {
+		BigDecimal cost = convertCurrencyToBigDecimal(costCoin);
+		BigDecimal price = convertCurrencyToBigDecimal(priceCoin);
+		return new Product(this.name, this.characteristics, cost, price, this.dateEntry, this.dateExit, this.sector, this.listCode);
+	}
+
+    // Method to set the dateEntry and dateExit using the string date
+    public Product convertDate(String entryDateStr, String exitDateStr) {
+        Instant entryDate = convertDateToInstant(entryDateStr);
+        Instant exitDate = convertDateToInstant(exitDateStr);
+        return new Product(this.name, this.characteristics, this.cost, this.price, entryDate, exitDate, this.sector, this.listCode);
+    }
+
     // Private method to avoid code duplication
     private BigDecimal convertCurrencyToBigDecimal(String coin) {
         // Remove all non-numeric characters except for dots and commas
@@ -129,12 +145,11 @@ public class Product implements Serializable{
         return new BigDecimal(valueWithoutCurrency);
     }
 
-    // Method that uses the utility to convert both cost and price
-    public Product convertCurrency(String costCoin, String priceCoin) {
-        BigDecimal cost = convertCurrencyToBigDecimal(costCoin);
-        BigDecimal price = convertCurrencyToBigDecimal(priceCoin);
-        return new Product(this.name, this.characteristics, cost, price, this.dateEntry, this.dateExit, this.sector, this.listCode);
-    }
+	private Instant convertDateToInstant(String dateStr) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		LocalDate localDate = LocalDate.parse(dateStr, formatter);
+		return localDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC);
+	}
 	
 	@Override
 	public int hashCode() {
