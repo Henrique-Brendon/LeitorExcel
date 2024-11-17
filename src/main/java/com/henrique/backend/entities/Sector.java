@@ -1,20 +1,19 @@
 package com.henrique.backend.entities;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Sector implements Serializable{
 	
     private static final long serialVersionUID = 1L;
-	
+
 	private Long id;
 	private String name;
 	
 	private List<Product> products = new ArrayList<>();
 	
-	public Sector() {}
-
 	public Sector(String name) {
 		this.name = name;
 	}

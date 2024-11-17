@@ -12,7 +12,6 @@ public class Product implements Serializable{
 	private Long id;
 	private String name;
 	private String characteristics;
-	private String imgUrl;
 	private BigDecimal cost;
 	private BigDecimal price;
 	private Instant dateEntry;
@@ -24,16 +23,29 @@ public class Product implements Serializable{
 	
 	public Product() {}
 
-	public Product(Long id, String name, String characteristics, String imgUrl, BigDecimal cost, BigDecimal price,
-			Instant dateEntry, Instant dateExit) {
-		this.id = id;
+	private Product(String name, String characteristics, BigDecimal cost, BigDecimal price, Instant dateEntry,
+			Instant dateExit, Sector sector, ListCode listCode) {
 		this.name = name;
 		this.characteristics = characteristics;
-		this.imgUrl = imgUrl;
 		this.cost = cost;
 		this.price = price;
 		this.dateEntry = dateEntry;
 		this.dateExit = dateExit;
+		this.sector = sector;
+		this.listCode = listCode;
+	}
+
+	public Product(Long id, String name, String characteristics, BigDecimal cost, BigDecimal price, Instant dateEntry,
+			Instant dateExit, Sector sector, ListCode listCode) {
+		this.id = id;
+		this.name = name;
+		this.characteristics = characteristics;
+		this.cost = cost;
+		this.price = price;
+		this.dateEntry = dateEntry;
+		this.dateExit = dateExit;
+		this.sector = sector;
+		this.listCode = listCode;
 	}
 
 	public Long getId() {
@@ -58,14 +70,6 @@ public class Product implements Serializable{
 
 	public void setCharacteristics(String characteristics) {
 		this.characteristics = characteristics;
-	}
-
-	public String getImgUrl() {
-		return imgUrl;
-	}
-
-	public void setImgUrl(String imgUrl) {
-		this.imgUrl = imgUrl;
 	}
 
 	public BigDecimal getCost() {
@@ -116,6 +120,22 @@ public class Product implements Serializable{
 		this.listCode = listCode;
 	}
 
+    // Private method to avoid code duplication
+    private BigDecimal convertCurrencyToBigDecimal(String coin) {
+        // Remove all non-numeric characters except for dots and commas
+        String valueWithoutCurrency = coin.replaceAll("[^0-9.,]", "").trim();
+        // Replace commas with dots if the number is in the "000,00" format
+        valueWithoutCurrency = valueWithoutCurrency.replace(",", ".");
+        return new BigDecimal(valueWithoutCurrency);
+    }
+
+    // Method that uses the utility to convert both cost and price
+    public Product convertCurrency(String costCoin, String priceCoin) {
+        BigDecimal cost = convertCurrencyToBigDecimal(costCoin);
+        BigDecimal price = convertCurrencyToBigDecimal(priceCoin);
+        return new Product(this.name, this.characteristics, cost, price, this.dateEntry, this.dateExit, this.sector, this.listCode);
+    }
+	
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
