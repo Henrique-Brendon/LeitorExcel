@@ -130,17 +130,12 @@ public final class ExcelFileService implements Serializable, ItemReader<ProductD
     @Override
     @Nullable
     public ProductDTO read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
-        try {
-            int currentIndex = 0;
-            if(currentIndex < productList.size()) {
-                return productList.get(currentIndex);
-            } else {
-                return null;
-            }
-        } catch(Exception e) {
-            e.getMessage();
-            throw e;
+        if (currentIndex != productList.size()) {
+            ProductDTO product = productList.get(currentIndex);
+            currentIndex++;
+            return product;
         }
+        return null;
     }
 
 }
