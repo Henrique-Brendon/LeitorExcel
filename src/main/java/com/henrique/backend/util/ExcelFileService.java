@@ -1,10 +1,12 @@
 package com.henrique.backend.util;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.compress.archivers.dump.InvalidFormatException;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -12,6 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.henrique.backend.dtos.ProductDTO;
+import com.henrique.backend.util.exceptions.ExcelFileException;
 
 public final class ExcelFileService implements Serializable{
 
@@ -22,7 +25,6 @@ public final class ExcelFileService implements Serializable{
     private List<ProductDTO> productList = new ArrayList<>();
 
     public ExcelFileService(String path) {
-        openXlsx(path);
     }
 
     // Method to open a spreadsheet
@@ -32,10 +34,19 @@ public final class ExcelFileService implements Serializable{
             for (int i = 0; i < book.getNumberOfSheets(); i++) {
                 sheet = book.getSheetAt(i);
                 processSheet(sheet, filledLines(sheet) - HEADER_NUMBER);
+               
             }
-        } catch (Exception e) {
-            e.getMessage();
+            System.out.println(productList.size());
+        } catch (InvalidFormatException e) {
+            throw new ExcelFileException("Wrong file format for file: " + path);
         }
+        catch (IOException e) {
+            throw new ExcelFileException("Failed to open file");
+        }
+        catch (Exception e) {
+            throw new ExcelFileException("Error");
+        }
+
     }
 
     // Function to find out the rows that contain data
@@ -67,17 +78,23 @@ public final class ExcelFileService implements Serializable{
     // Process each row in the sheet
     private void processSheet(XSSFSheet sheet, int lastRow) {
         int count = HEADER_NUMBER;
-
-        for (int i = 0; i < lastRow; i++) {
-            XSSFRow row = sheet.getRow(count);
-            if (row != null) {
-                ProductDTO product = readProductData(row);
-                if (product != null) {
-                    productList.add(product);
+        try {
+            for (int i = 0; i < lastRow; i++) {
+                XSSFRow row = sheet.getRow(count);
+                
+                if (row != null) {
+                    ProductDTO product = readProductData(row);
+                    if (product != null) {
+                        productList.add(product);
+                    }
                 }
+                count++;
             }
-            count++;
+            
+        } catch(NullPointerException e) {
+            throw new ExcelFileException("Missing or null cell");
         }
+
     }
 
     private ProductDTO readProductData(XSSFRow row) {
@@ -103,9 +120,8 @@ public final class ExcelFileService implements Serializable{
             }
             productList.addAll(products);
 
-        } catch (Exception e) {
-            System.err.println("Error reading row data: " + e.getMessage());
-            return null;
+        } catch (NumberFormatException e) {
+            throw new ExcelFileException("Error reading row data");
         }
         return null;
     }
@@ -120,4 +136,5 @@ public final class ExcelFileService implements Serializable{
             default -> "Type not supported";
         };
     }
+
 }
