@@ -31,6 +31,7 @@ public final class ExcelFileService implements Serializable, ItemReader<ProductD
     private List<ProductDTO> productList = new ArrayList<>();
 
     public ExcelFileService(String path) {
+        openXlsx(path);
     }
 
     // Method to open a spreadsheet
@@ -42,7 +43,6 @@ public final class ExcelFileService implements Serializable, ItemReader<ProductD
                 processSheet(sheet, filledLines(sheet) - HEADER_NUMBER);
                
             }
-            System.out.println(productList.size());
         } catch (InvalidFormatException e) {
             throw new ExcelFileException("Wrong file format for file: " + path);
         }
@@ -143,18 +143,25 @@ public final class ExcelFileService implements Serializable, ItemReader<ProductD
         };
     }
 
-<<<<<<< HEAD
-=======
     @Override
     @Nullable
-    public ProductDTO read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
-        if (currentIndex != productList.size()) {
-            ProductDTO product = productList.get(currentIndex);
-            currentIndex++;
-            return product;
+    public ProductDTO read() {
+        try {
+            if (currentIndex != productList.size()) {
+                ProductDTO product = productList.get(currentIndex);
+                currentIndex++;
+                return product;
+            }
+            return null;
+        } catch(IndexOutOfBoundsException e) {
+            throw new ExcelFileException("Error: Index is outside the list bounds");
+        } catch(ParseException e) {
+            throw new ExcelFileException("Error when trying to parse a value");
+        } catch(UnexpectedInputException e) {
+            throw new ExcelFileException("Unexpected error while processing input data from Excel File");
+        } catch(NonTransientResourceException e) {
+            throw new ExcelFileException("Error acessing resource required to process Excel file");
         }
-        return null;
     }
 
->>>>>>> BatchConfig
 }
