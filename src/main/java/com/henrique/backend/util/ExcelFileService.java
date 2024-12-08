@@ -18,17 +18,17 @@ import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.lang.Nullable;
 
-import com.henrique.backend.dtos.ProductDTO;
+import com.henrique.backend.dtos.ExcelDTO;
 import com.henrique.backend.util.exceptions.ExcelFileException;
 
-public final class ExcelFileService implements Serializable, ItemReader<ProductDTO>{
+public final class ExcelFileService implements Serializable, ItemReader<ExcelDTO>{
 
     private static final int HEADER_NUMBER = 4;
     private static final int ROW_NUMBER = 9;
     private int currentIndex = 0;
 
     private XSSFSheet sheet;
-    private List<ProductDTO> productList = new ArrayList<>();
+    private List<ExcelDTO> itemExcelList = new ArrayList<>();
 
     public ExcelFileService(String path) {
         openXlsx(path);
@@ -89,9 +89,9 @@ public final class ExcelFileService implements Serializable, ItemReader<ProductD
                 XSSFRow row = sheet.getRow(count);
                 
                 if (row != null) {
-                    ProductDTO product = readProductData(row);
-                    if (product != null) {
-                        productList.add(product);
+                    ExcelDTO itemDTO = readProductData(row);
+                    if (itemDTO != null) {
+                        itemExcelList.add(itemDTO);
                     }
                 }
                 count++;
@@ -103,7 +103,7 @@ public final class ExcelFileService implements Serializable, ItemReader<ProductD
 
     }
 
-    ProductDTO readProductData(XSSFRow row) {
+    ExcelDTO readProductData(XSSFRow row) {
         try {
             String[] attributes = {
                 getCellValue(row.getCell(0)),
@@ -119,12 +119,12 @@ public final class ExcelFileService implements Serializable, ItemReader<ProductD
             double quantity = Double.parseDouble(getCellValue(row.getCell(8)));
 
             // Added the product to the list the number of times indicated by the quantity
-            List<ProductDTO> products = new ArrayList<>((int) quantity);
+            List<ExcelDTO> itemDTO = new ArrayList<>((int) quantity);
             for (int i = 0; i < quantity; i++) {
-                products.add(new ProductDTO(attributes[0], attributes[1], attributes[2], attributes[3], attributes[4],
+                itemDTO.add(new ExcelDTO(attributes[0], attributes[1], attributes[2], attributes[3], attributes[4],
                 attributes[5], attributes[6], attributes[7]));
             }
-            productList.addAll(products);
+            itemExcelList.addAll(itemDTO);
 
         } catch (NumberFormatException e) {
             throw new ExcelFileException("Error reading row data");
@@ -145,12 +145,12 @@ public final class ExcelFileService implements Serializable, ItemReader<ProductD
 
     @Override
     @Nullable
-    public ProductDTO read() {
+    public ExcelDTO read() {
         try {
-            if (currentIndex != productList.size()) {
-                ProductDTO product = productList.get(currentIndex);
+            if (currentIndex != itemExcelList.size()) {
+                ExcelDTO itemDTO = itemExcelList.get(currentIndex);
                 currentIndex++;
-                return product;
+                return itemDTO;
             }
             return null;
         } catch(IndexOutOfBoundsException e) {

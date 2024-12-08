@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.henrique.backend.dtos.ProductDTO;
+import com.henrique.backend.dtos.ExcelDTO;
 import com.henrique.backend.entities.ListCode;
 import com.henrique.backend.entities.Product;
 import com.henrique.backend.entities.Sector;
@@ -41,9 +41,9 @@ public class BatchConfig {
     }
 
     @Bean
-    Step stepExcelFile(ItemReader<ProductDTO> reader, ItemProcessor<ProductDTO, Product> processor, ItemWriter<Product> writer) {
+    Step stepExcelFile(ItemReader<ExcelDTO> reader, ItemProcessor<ExcelDTO, Product> processor, ItemWriter<Product> writer) {
         return new StepBuilder("stepExcelFile", jobRepository)
-            .<ProductDTO, Product>chunk(1000, transactionManager)
+            .<ExcelDTO, Product>chunk(1000, transactionManager)
             .reader(reader)
             .processor(processor)
             .writer(writer)
@@ -51,15 +51,15 @@ public class BatchConfig {
     }
 
     @Bean
-    ItemReader<ProductDTO> reader() {
+    ItemReader<ExcelDTO> reader() {
         return new ExcelFileService("files//amd.xlsx");
     }
 
     @Bean
-    ItemProcessor<ProductDTO, Product> processor() {
+    ItemProcessor<ExcelDTO, Product> processor() {
         return item -> {
             var product = new Product(null, item.name(), item.characteristics(), null, null, null,
-                null, new Sector(item.sector()), new ListCode(item.listCode()))
+                null, new Sector().mapSetor(item.name()), new ListCode(item.listCode()))
                 .convertCurrency(item.cost(), item.price())
                 .convertDate(item.dateEntry(), item.dateExit());
             return product;
