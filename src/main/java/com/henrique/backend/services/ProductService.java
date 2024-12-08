@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +23,16 @@ public class ProductService {
     @Autowired
     private ProductRepository repository;
 
+
     public  Product insert(ProductDTO productDTO) {
         return repository.save(convertProductDtoToProduct(productDTO));
+    }
+
+    public List<Product> insertProducts(List<ProductDTO> productDTOs) {
+        List<Product> products = productDTOs.stream()
+            .map(this:: convertProductDtoToProduct)
+            .collect(Collectors.toList());
+        return repository.saveAll(products);
     }
 
     private Product convertProductDtoToProduct(ProductDTO productDTO) {
