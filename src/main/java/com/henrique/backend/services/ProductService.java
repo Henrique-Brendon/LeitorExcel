@@ -41,6 +41,10 @@ public class ProductService {
         return repository.save(entity);
     }
 
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+
     private Product convertProductDtoToProduct(ProductDTO productDTO) {
         return new Product(null, productDTO.name(), productDTO.characteristics(), new BigDecimal(productDTO.cost().trim()),
             new BigDecimal(productDTO.price().trim()), formatInstant(productDTO.dateEntry()), formatInstant(productDTO.dateExit()),
