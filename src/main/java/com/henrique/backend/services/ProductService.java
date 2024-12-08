@@ -35,6 +35,12 @@ public class ProductService {
         return repository.saveAll(products);
     }
 
+    public Product update(Long id, ProductDTO productDTO) {
+        Product entity = repository.getReferenceById(id);
+        updateData(entity, productDTO);
+        return repository.save(entity);
+    }
+
     private Product convertProductDtoToProduct(ProductDTO productDTO) {
         return new Product(null, productDTO.name(), productDTO.characteristics(), new BigDecimal(productDTO.cost().trim()),
             new BigDecimal(productDTO.price().trim()), formatInstant(productDTO.dateEntry()), formatInstant(productDTO.dateExit()),
@@ -48,5 +54,16 @@ public class ProductService {
 		LocalDate localDate = LocalDate.parse(date, fmt);
 		return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
 	}
+
+    private void updateData(Product entity, ProductDTO productDTO) {
+        entity.setName(productDTO.name());
+        entity.setCharacteristics(productDTO.characteristics());
+        entity.setCost(new BigDecimal(productDTO.cost().trim()));
+        entity.setPrice(new BigDecimal(productDTO.price().trim()));
+        entity.setDateEntry(formatInstant(productDTO.dateEntry()));
+        entity.setDateExit(formatInstant(productDTO.dateExit()));
+        entity.setSector(new Sector().mapSetor(productDTO.name()));
+        entity.setListCode(new ListCode(productDTO.listCode()));
+    }
     
 }
