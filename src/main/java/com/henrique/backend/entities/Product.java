@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,7 +34,7 @@ public class Product implements Serializable{
 	@JoinColumn(name = "sector")
 	private Sector sector;
 
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "codList")
 	private ListCode listCode;
 	
