@@ -1,20 +1,24 @@
 package com.henrique.backend.services;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.henrique.backend.dtos.ProductDTO;
 import com.henrique.backend.entities.ListCode;
 import com.henrique.backend.entities.Product;
 import com.henrique.backend.entities.Sector;
+import com.henrique.backend.entities.emp.SectorType;
 import com.henrique.backend.repositories.ProductRepository;
 
 @Service
@@ -23,6 +27,15 @@ public class ProductService {
     @Autowired
     private ProductRepository repository;
 
+    public List<ProductDTO> findAll() {
+        return convertProductDTO(repository.findAll());
+    }
+
+    public List<ProductDTO> getAllProductsSort(String campo, String direcao) {
+		Sort.Direction direction = "DESC".equalsIgnoreCase(direcao) ? Sort.Direction.DESC : Sort.Direction.ASC;
+		Sort sort = Sort.by(direction, campo);
+		return convertProductDTO(repository.findAll(sort));
+	}
 
     public  Product insert(ProductDTO productDTO) {
         return repository.save(convertProductDtoToProduct(productDTO));
@@ -69,5 +82,42 @@ public class ProductService {
         entity.setSector(new Sector().mapSetor(productDTO.name()));
         entity.setListCode(new ListCode(productDTO.listCode()));
     }
+
+    private List<ProductDTO> convertProductDTO(List<Product> listProducts) {
+        List<ProductDTO> listProductsDTO = new ArrayList<>();
+        
+        listProducts.forEach(product -> {
+            String listCode = (product.getListCode() != null) ? product.getListCode().getCode() : "Unknown"; // Previne o NPE
+            SectorType sectorType = (product.getSector() != null) ? product.getSector().getName() : SectorType.DEFAULT;
+
+            listProductsDTO.add(new ProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getCharacteristics(),
+                formatCurrency(product.getCost()),
+                formatCurrency(product.getPrice()),
+                formatDate(product.getDateEntry()),
+                formatDate(product.getDateExit()),
+                sectorType,
+                listCode
+            ));
+        });
+        
+        return listProductsDTO;
+    }
+    
+	private String formatDate(Instant date) {
+		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault());
+		
+		String formattedDate = fmt.format(date);
+		return formattedDate;
+	}
+	
+	private String formatCurrency(BigDecimal valueBigDecimal) {
+		DecimalFormat fmt = new DecimalFormat("0.00 'R$'");
+		
+		String formattedValue = fmt.format(valueBigDecimal);
+		return formattedValue;
+	}
     
 }
