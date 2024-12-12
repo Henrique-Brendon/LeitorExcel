@@ -20,9 +20,10 @@ import com.henrique.backend.entities.Product;
 import com.henrique.backend.entities.Sector;
 import com.henrique.backend.entities.emp.SectorType;
 import com.henrique.backend.repositories.ProductRepository;
+import com.henrique.backend.services.execeptions.ServiceException;
 
 @Service
-public class ProductService {
+public class ProductService extends BaseService{
     
     @Autowired
     private ProductRepository repository;
@@ -38,24 +39,31 @@ public class ProductService {
 	}
 
     public  Product insert(ProductDTO productDTO) {
-        return repository.save(convertProductDtoToProduct(productDTO));
+        return execute(() -> repository.save(convertProductDtoToProduct(productDTO)), "Error inserting product");
     }
 
     public List<Product> insertProducts(List<ProductDTO> productDTOs) {
-        List<Product> products = productDTOs.stream()
-            .map(this:: convertProductDtoToProduct)
-            .collect(Collectors.toList());
-        return repository.saveAll(products);
-    }
+        return execute(() -> {
+	        List<Product> products = productDTOs.stream()
+	                .map(this::convertProductDtoToProduct)
+	                .collect(Collectors.toList());
+	        return repository.saveAll(products); // Salva a lista inteira de uma vez
+	    }, "Error saving products");
+	}
 
     public Product update(Long id, ProductDTO productDTO) {
-        Product entity = repository.getReferenceById(id);
-        updateData(entity, productDTO);
-        return repository.save(entity);
+    	return execute(() -> {
+    		Product entity = repository.findById(id).orElseThrow(() ->
+    			new ServiceException("Product not found with ID: " + id)
+			);
+    		updateData(entity, productDTO);
+    		return repository.save(entity);
+    	}, "Error updating product with ID:" + id);
+    	
     }
 
-    public void delete(Long id) {
-        repository.deleteById(id);
+    public void deleteById(Long id) {
+        execute(() -> repository.deleteById(id), "Error deleting product with id: " + id);
     }
 
     private Product convertProductDtoToProduct(ProductDTO productDTO) {
