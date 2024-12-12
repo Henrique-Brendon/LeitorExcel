@@ -61,6 +61,9 @@ public class ProductService extends BaseService{
     	}, "Error updating product with ID:" + id);
     	
     }
+    public Product findById(Long id) {
+		return repository.findById(id).orElseThrow(() -> new ServiceException("Product not found with ID: " + id));
+	}
 
     public void deleteById(Long id) {
         execute(() -> repository.deleteById(id), "Error deleting product with id: " + id);
