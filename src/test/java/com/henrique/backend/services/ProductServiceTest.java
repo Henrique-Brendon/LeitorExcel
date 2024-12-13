@@ -1,12 +1,17 @@
 package com.henrique.backend.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
-
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,6 +22,7 @@ import com.henrique.backend.dtos.ProductDTO;
 import com.henrique.backend.entities.Product;
 import com.henrique.backend.entities.emp.SectorType;
 import com.henrique.backend.repositories.ProductRepository;
+import com.henrique.backend.services.execeptions.ServiceException;
 /**
  * Unit test class for service layer {@link ProductService}.
  * <p>
@@ -65,6 +71,36 @@ public class ProductServiceTest {
     	startList();
     }
 
+    @Test
+    void testFindById_Success() {
+    	when(repository.findById(1L)).thenReturn(Optional.of(listProducts.get(0)));
+    	
+    	Product result = service.findById(1L);
+    	
+        assertEquals(1L, result.getId());
+        assertEquals(listProducts.get(0).getName(), result.getName());
+    }
+    
+    /**
+     * Test case to validate the behavior of the service when a product is not found by its ID.
+     * <p>
+     * Simulates a scenario where the repository does not contain a product with the given ID
+     * and ensures the service throws the appropriate exception.
+     * </p>
+     * 
+     * <ul>
+     * <li>Mocks the repository to return an empty {@code Optional} when queried by ID.</li>
+     * <li>Verifies that the service throws a {@link ServiceException}.</li>
+     * </ul>
+     * 
+     * @throws ServiceException when the product is not found.
+     */
+    @Test
+    void testFindById_NotFound() {
+    	when(repository.findById(1L)).thenReturn(Optional.empty());
+    	
+    	assertThrows(ServiceException.class, () -> service.findById(1L));
+    }
 
     /**
      * Initializes lists of products and DTOs for use in testing.
