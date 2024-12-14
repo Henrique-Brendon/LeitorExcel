@@ -230,7 +230,46 @@ public class ProductServiceTest {
     	assertTrue(result.isEmpty());
     	verify(repository, times(1)).saveAll(Collections.emptyList());
     }
+
+    /**
+     * Tests updating an existing product with valid data.
+     * <p>
+     * Checks if the updated product fields match the values
+     * of the input DTO and ensures that the {@code findById} and {@code save} methods
+     * are called correctly.
+     * </p>
+     */
+    @Test
+    void testUpdate_Sucess() {
+    	when(repository.findById(1L)).thenReturn(Optional.of(listProducts.get(1)));
+    	when(repository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    	
+    	Product product = service.update(1L, listProductsDTOs.get(1));
+    	
+    	assertEquals(listProductsDTOs.get(1).name(), product.getName());
+    	assertEquals(listProductsDTOs.get(1).characteristics(), product.getCharacteristics());
+    	
+    	verify(repository, times(1)).findById(1L);
+    	verify(repository, times(1)).save(listProducts.get(1));
+    }
     
+    /**
+     * Test an update attempt for a non-existent product.
+     * <p>
+     * Ensures that a {@link ServiceException} exception is thrown when trying
+     * update a product with a non-existent ID and the {@code save} method
+     * is never called.
+     *</p>
+    */
+    @Test
+    void testUpdate_NotFound() {
+    	when(repository.findById(99L)).thenReturn(Optional.empty());
+    	
+    	assertThrows(ServiceException.class, () -> service.update(99L, listProductsDTOs.get(1)));
+    	
+    	verify(repository, times(1)).findById(99L);
+    	verify(repository, times(0)).save(any(Product.class));
+    }
 
     /**
      * Initializes lists of products and DTOs for use in testing.
