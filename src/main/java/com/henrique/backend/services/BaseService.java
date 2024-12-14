@@ -9,7 +9,7 @@ public abstract class BaseService {
 
     protected <T> T execute(Supplier<T> action, String errorMessage) {
         try {
-            return action.get(); // Executa o método específico
+            return action.get();
         } catch (IllegalArgumentException e) {
             throw new ServiceException(errorMessage + " - Invalid argument", e);
         } catch (DataAccessException e) {
@@ -21,7 +21,7 @@ public abstract class BaseService {
 
     protected void execute(Runnable action, String errorMessage) {
         try {
-            action.run(); // Executa a ação específica
+            action.run();
         } catch (IllegalArgumentException e) {
             throw new ServiceException(errorMessage + " - Invalid argument", e);
         } catch (DataAccessException e) {

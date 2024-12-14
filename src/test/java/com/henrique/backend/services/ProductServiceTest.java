@@ -25,12 +25,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
 import com.henrique.backend.dtos.ProductDTO;
 import com.henrique.backend.entities.Product;
 import com.henrique.backend.entities.emp.SectorType;
 import com.henrique.backend.repositories.ProductRepository;
 import com.henrique.backend.services.execeptions.ServiceException;
+import com.henrique.backend.util.ProductMapper;
 /**
  * Unit test class for service layer {@link ProductService}.
  * <p>
@@ -77,6 +79,52 @@ public class ProductServiceTest {
     void setUp() {
     	MockitoAnnotations.openMocks(this);
     	startList();
+    }
+
+    /**
+     * Retrieves all products from the repository and maps them to DTOs.
+     * <p>
+     * This method fetches all records from the database and converts them
+     * into {@link ProductDTO} objects using the {@link ProductMapper}.
+     * </p>
+     *
+     * @return List of all {@link ProductDTO} objects.
+     */
+    @Test
+    void testFindAllProducts() {
+        when(repository.findAll()).thenReturn(listProducts);
+
+        List<ProductDTO> result = service.findAll();
+
+        assertNotNull(result);
+        assertEquals(listProducts.size(), result.size());
+        assertEquals(listProducts.get(0).getName(), result.get(0).name());
+
+        verify(repository, times(1)).findAll();
+    }
+
+    /**
+     * Retrieves all products from the repository sorted by a specified field and direction.
+     * <p>
+     * This method fetches all records from the database and sorts them based on the given field
+     * and direction before converting them into {@link ProductDTO} objects.
+     * </p>
+     *
+     * @param campo    The field by which the products should be sorted (e.g., "name", "cost").
+     * @param direcao  The direction of sorting ("ASC" for ascending, "DESC" for descending).
+     * @return List of sorted {@link ProductDTO} objects.
+     */
+    @Test
+    void testGetAllProductsSort_Ascending() {
+        when(repository.findAll(Sort.by(Sort.Direction.ASC, "name"))).thenReturn(listProducts);
+
+        List<ProductDTO> result = service.getAllProductsSort("name", "ASC");
+
+        assertNotNull(result);
+        assertEquals(listProducts.size(), result.size());
+        assertTrue(result.get(0).name().compareTo(result.get(1).name()) <= 0);
+
+        verify(repository, times(1)).findAll(Sort.by(Sort.Direction.ASC, "name"));
     }
 
     /**
