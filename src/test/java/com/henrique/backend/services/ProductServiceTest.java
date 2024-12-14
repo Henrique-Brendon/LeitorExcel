@@ -2,6 +2,7 @@ package com.henrique.backend.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -157,6 +158,39 @@ public class ProductServiceTest {
     
         assertEquals("Error deleting product with id: 1 - Unexpected error", exception.getMessage());
         verify(repository, times(1)).deleteById(id);
+    }
+
+    /**
+     * Tests the insertion of a product with valid data.
+     * <p>
+     * Simulates repository behavior when saving the product and checks
+     * whether the returned values ​​match the input DTO data.
+     * </p>
+     */
+    @Test
+    void testInsertSuccess() {
+        when(repository.save(any(Product.class))).thenReturn(listProducts.get(0));
+        Product result = service.insert(listProductsDTOs.get(0));
+
+        assertEquals(listProductsDTOs.get(0).name(), result.getName());
+        assertEquals(listProductsDTOs.get(0).characteristics(), result.getCharacteristics());
+        assertEquals(new BigDecimal(listProductsDTOs.get(0).cost()), result.getCost());
+        verify(repository, times(1)).save(any(Product.class));
+    }
+    
+    /**
+     * Tests the attempt to insert a product with invalid data.
+     * <p>
+     * Ensures that a {@link ServiceException} exception is thrown when trying
+     * insert a DTO with inconsistent or invalid values.
+     * </p>
+     */
+    @Test
+    void testInsertWithInvalidData() {
+    	ProductDTO invalidProductDTO = new ProductDTO(null, null, "", "invalid-cost", "20.00", "10/12/2023", "11/12/2023", null, "Code1");
+    	assertThrows(ServiceException.class, () -> {
+    		service.insert(invalidProductDTO);
+    	});
     }
     
 
