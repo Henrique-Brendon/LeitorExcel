@@ -1,9 +1,9 @@
 package com.henrique.backend.services;
 
-import java.util.function.Supplier;
-
-import org.hibernate.service.spi.ServiceException;
+import com.henrique.backend.services.execeptions.ServiceException;
 import org.springframework.dao.DataAccessException;
+
+import java.util.function.Supplier;
 
 public abstract class BaseService {
 
@@ -11,11 +11,11 @@ public abstract class BaseService {
         try {
             return action.get(); // Executa o método específico
         } catch (IllegalArgumentException e) {
-            throw new ServiceException("Invalid argument: " + errorMessage, e);
+            throw new ServiceException(errorMessage + " - Invalid argument", e);
         } catch (DataAccessException e) {
-            throw new ServiceException("Database error: " + errorMessage, e);
+            throw new ServiceException(errorMessage + " - Database error", e);
         } catch (Exception e) {
-            throw new ServiceException("Unexpected error: " + errorMessage, e);
+            throw new ServiceException(errorMessage + " - Unexpected error", e);
         }
     }
 
@@ -23,11 +23,11 @@ public abstract class BaseService {
         try {
             action.run(); // Executa a ação específica
         } catch (IllegalArgumentException e) {
-            throw new ServiceException("Invalid argument: " + errorMessage, e);
+            throw new ServiceException(errorMessage + " - Invalid argument", e);
         } catch (DataAccessException e) {
-            throw new ServiceException("Database error: " + errorMessage, e);
+            throw new ServiceException(errorMessage + " - Database error", e);
         } catch (Exception e) {
-            throw new ServiceException("Unexpected error: " + errorMessage, e);
+            throw new ServiceException(errorMessage + " - Unexpected error", e);
         }
     }
 }
