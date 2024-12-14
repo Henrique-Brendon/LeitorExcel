@@ -1,8 +1,11 @@
 package com.henrique.backend.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -191,6 +195,40 @@ public class ProductServiceTest {
     	assertThrows(ServiceException.class, () -> {
     		service.insert(invalidProductDTO);
     	});
+    }
+
+    /**
+     * Test the insertion of multiple products with valid data.
+     * <p>
+     * Check that the {@code saveAll} method was called correctly
+     * and whether all products are converted and saved.
+     *</p>
+    */
+    @Test
+    void testInserProducts_Success() {
+    	when(repository.saveAll(anyList())).thenReturn(listProducts);
+    	
+    	List<Product> result = service.insertProducts(listProductsDTOs);
+    	
+    	assertNotNull(result);
+    	assertEquals(listProductsDTOs.size(), result.size());
+    	verify(repository, times(1)).saveAll(anyList());
+    }
+    
+    /**
+     * Tests the insertion of an empty list of products.
+     * <p>
+     * Ensures that the service returns an empty list without errors and that the repository
+     * calls {@code saveAll} with the empty list.
+     * </p>
+     */
+    @Test
+    void testInsertProducts_EmptyList() {
+    	List<Product> result = service.insertProducts(Collections.emptyList());
+    	
+    	assertNotNull(result);
+    	assertTrue(result.isEmpty());
+    	verify(repository, times(1)).saveAll(Collections.emptyList());
     }
     
 
