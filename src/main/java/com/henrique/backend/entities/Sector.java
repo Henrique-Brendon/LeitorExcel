@@ -77,6 +77,9 @@ public class Sector implements Serializable{
 		productToSectorMap.put("RX 570", new Sector(null, SectorType.HARDWARE));
 		productToSectorMap.put("RX 580", new Sector(null, SectorType.HARDWARE));
 		productToSectorMap.put("RX 590", new Sector(null, SectorType.HARDWARE));
+		productToSectorMap.put("RYZEN 3 3200G", new Sector(null, SectorType.HARDWARE));
+		productToSectorMap.put("RYZEN 5 3500", new Sector(null, SectorType.HARDWARE));
+		productToSectorMap.put("RYZEN 5 3600", new Sector(null, SectorType.HARDWARE));
 	
 		// Setor padrão (DEFAULT) caso o produto não seja encontrado no mapa
 		Sector sector = new Sector(null, SectorType.DEFAULT);

@@ -1,3 +1,4 @@
+/* 
 package com.henrique.backend.config;
 
 import java.math.BigDecimal;
@@ -60,8 +61,8 @@ public void run(String... args) throws Exception {
 	// Salva os setores e os produtos associados no banco
 	sectorRepository.saveAll(listSectors);
 	productRepository.saveAll(listProducts);
-	
-
 }
 
 }
+
+*/

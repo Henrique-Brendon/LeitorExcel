@@ -27,6 +27,9 @@ public class ListCode implements Serializable{
     @OneToMany(mappedBy = "listCode")
 	private List<Product> products = new ArrayList<>();
 
+	public ListCode() {
+	}
+
 	public ListCode(String code) {
 		this.code = code;
 	}

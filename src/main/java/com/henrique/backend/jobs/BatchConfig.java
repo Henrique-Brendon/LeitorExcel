@@ -1,6 +1,7 @@
 package com.henrique.backend.jobs;
 
-import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -11,7 +12,6 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -20,7 +20,11 @@ import com.henrique.backend.dtos.ExcelDTO;
 import com.henrique.backend.entities.ListCode;
 import com.henrique.backend.entities.Product;
 import com.henrique.backend.entities.Sector;
+import com.henrique.backend.repositories.ListCodeRepository;
+import com.henrique.backend.repositories.ProductRepository;
+import com.henrique.backend.repositories.SectorRepository;
 import com.henrique.backend.util.ExcelFileService;
+
 
 @Configuration
 public class BatchConfig {
@@ -68,15 +72,30 @@ public class BatchConfig {
 
 
     @Bean
-    ItemWriter<Product> writer(DataSource dataSource) {
-        return new JdbcBatchItemWriterBuilder<Product>()
-            .dataSource(dataSource)
-            .sql("""
-                    INSERT INTO product (name, characteristics, cost, price, date_entry, date_exit, sector_id, list_code_id)
-                    VALUES (:name, :characteristics, :cost, :price, :dateEntry, :dateExit, :sector.id, :listCode.id)  
-                """)
-            .beanMapped()
-            .build();
-    }
+    ItemWriter<Product> writer(SectorRepository sectorRepository, ProductRepository productRepository, ListCodeRepository listCodeRepository) {
+        return items -> {
+            List<Sector> listSectors = new ArrayList<>();
+            List<ListCode> listCodes = new ArrayList<>();
     
+            items.forEach(product -> {
+                Sector sector = new Sector().mapSetor(product.getName());
+
+                product.setSector(sector);
+
+                sector.getProducts().add(product);
+            
+                if (!listSectors.contains(sector)) {
+                    listSectors.add(sector);
+                }
+
+                if (product.getListCode() != null && !listCodes.contains(product.getListCode())) {
+                    listCodes.add(product.getListCode());
+                }
+            });
+
+            sectorRepository.saveAll(listSectors);
+            listCodeRepository.saveAll(listCodes);
+            productRepository.saveAll(items);
+        };
+    }
 }

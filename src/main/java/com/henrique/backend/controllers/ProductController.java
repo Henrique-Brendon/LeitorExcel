@@ -30,12 +30,12 @@ public class ProductController {
         Product product = productService.findById(id);
         return ResponseEntity.ok().body(product);
     }
+
     @GetMapping("/products")
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
         List<ProductDTO> products = productService.findAll();
         return ResponseEntity.ok(products);
     }
-    
 
     @GetMapping("/filteredProducts")
     public ResponseEntity<List<ProductDTO>> getAllProductsSort(@RequestParam String campo, @RequestParam String direction) {
