@@ -21,7 +21,7 @@ import org.springframework.lang.Nullable;
 import com.henrique.backend.dtos.ExcelDTO;
 import com.henrique.backend.util.exceptions.ExcelFileException;
 
-public final class ExcelFileService implements Serializable, ItemReader<ExcelDTO>{
+public final class ExcelFileUtil implements Serializable, ItemReader<ExcelDTO>{
 
     private static final int HEADER_NUMBER = 4;
     private static final int ROW_NUMBER = 9;
@@ -30,7 +30,7 @@ public final class ExcelFileService implements Serializable, ItemReader<ExcelDTO
     private XSSFSheet sheet;
     private List<ExcelDTO> itemExcelList = new ArrayList<>();
 
-    public ExcelFileService(String path) {
+    public ExcelFileUtil(String path) {
         openXlsx(path);
     }
 

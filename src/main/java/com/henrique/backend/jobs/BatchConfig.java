@@ -23,7 +23,7 @@ import com.henrique.backend.entities.Sector;
 import com.henrique.backend.repositories.ListCodeRepository;
 import com.henrique.backend.repositories.ProductRepository;
 import com.henrique.backend.repositories.SectorRepository;
-import com.henrique.backend.util.ExcelFileService;
+import com.henrique.backend.util.ExcelFileUtil;
 
 
 @Configuration
@@ -56,7 +56,7 @@ public class BatchConfig {
 
     @Bean
     ItemReader<ExcelDTO> reader() {
-        return new ExcelFileService("files//amd.xlsx");
+        return new ExcelFileUtil("files//amd.xlsx");
     }
 
     @Bean
